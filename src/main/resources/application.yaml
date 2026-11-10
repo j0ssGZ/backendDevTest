@@ -1,0 +1,5 @@
+server:
+  port: 5000
+
+upstream:
+  base-url: ${UPSTREAM_BASE_URL:http://localhost:3001}
