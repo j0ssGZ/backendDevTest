@@ -1,0 +1,31 @@
+{
+  "observed_max_active": 32,
+  "observed_max_pending": 87,
+  "final_observed_pool": [
+    0,
+    4,
+    0
+  ],
+  "pool_snapshots": 4349,
+  "client_attempts_by_path": {
+    "/product/1/similarids": 25,
+    "/product/2": 2,
+    "/product/3": 4,
+    "/product/4": 2,
+    "/product/2/similarids": 3056,
+    "/product/100": 108,
+    "/product/1000": 186
+  },
+  "canary_statuses": {
+    "200": 15,
+    "503": 7,
+    "504": 1
+  },
+  "all_canary_bodies_valid": true,
+  "measurement_scope": "Separate instrumented cold-slow diagnostic with prewarmed normal details, canaries, recovery and TTL expiry. Not the official run.",
+  "configured_pending_limit": 64,
+  "pending_limit_note": "Observed 87 is a transient internal pending counter; enqueue/drain enforcement is not an atomic counter ceiling.",
+  "client_attempts_note": "WebClient attempt logs before pool admission; not counts of requests received by simulado. Includes warmup, canaries, recovery and expiry.",
+  "warm_recovery_seconds": 0.010394,
+  "expired_reload_seconds": 5.057841
+}

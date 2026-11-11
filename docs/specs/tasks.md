@@ -106,16 +106,34 @@ No k6 benchmark, speculative tuning, CI workflow or deployment in this milestone
 Delivery: commit `feat: add bounded resilience and product caching`, push to
 `origin/main`, inspect CI once and stop. M04 requires explicit user approval.
 
-## M04 — k6 performance testing and optimization
+## M04 — k6 performance testing and optimization (completed)
 
-Start the supplied infrastructure and run the original benchmark before delivery.
-Measure first, optimize only demonstrated bottlenecks, then repeat meaningful checks.
+- [x] Inspect the exact scenario windows and preserve supplied scripts/fixtures.
+- [x] Free port 5000 through supported AirPlay Receiver settings; verify disabled
+  state without terminating a macOS service. Record the restoration procedure.
+- [x] Run `docker compose up -d simulado influxdb grafana`, then the exact official
+  `docker compose run --rm k6 run scripts/test.js` against the actual application.
+- [x] Record 17,022 raw HTTP samples, status-specific latency, expected versus
+  saturation outcomes and the original script's request-start/interrupt limitations.
+- [x] Compare separate fresh-process cold/warm runs with unchanged limits;
+  all 14,479 diagnostic response bodies validate and starts/completions are counted.
+- [x] Sample JVM/socket use; separately trace pool saturation, fast-request
+  interference, transient pending-counter overshoot, cleanup and runtime TTL expiry.
+- [x] Measure one focused concurrency-1 candidate against cold slow baseline;
+  non-200 responses worsen from 38.41% to 50.11%. Discard the runtime override,
+  retain concurrency 4 and all production defaults. No new dependency/coalescing.
+- [x] `./mvnw clean verify`: 166 tests pass; extraction and summary reproduction
+  checked. Confirm contracts, mocks, Compose, k6, source/tests and port default unchanged.
+- [x] Retain compact evidence under `docs/performance/` and decisions in
+  [M04 verification](m04-performance-verification.md). Temporary app/samplers stopped.
 
-Acceptance: execute `docker compose run --rm k6 run scripts/test.js`; preserve the
-original script and Compose services. Record commands, environment, cold/warm
-conditions, latency percentiles, throughput, errors and upstream call behavior.
-Verify response correctness separately; compare against explicit agreed targets.
-Report blockers honestly; do not mark this milestone complete without a real run.
+Acceptance: the real official execution and independent correctness verification
+are complete. No performance pass threshold is invented. Single-host measurements
+and unresolved cold-overload/fairness/freshness constraints are explicit; M05/M06
+remain untouched. AirPlay Receiver stays disabled so 5000 remains available.
+
+Delivery: commit the benchmark evidence, push to `origin/main`, inspect CI once and
+stop. M05 and M06 require explicit user approval.
 
 ## M05 — Final technical audit and README
 

@@ -213,6 +213,25 @@ presence, including distinguishing missing availability from `false`.
    no owned scheduler or thread pool. A breaker remains a future option only if
    measured outage behavior justifies its additional state and configuration.
 
+## M04 measured behavior
+
+The official unchanged benchmark and separate cold/warm diagnostics justify keeping
+M03 defaults for now, not claiming they support every 200-VU workload successfully.
+Cold duplicate misses fill the shared pool; slow calls can reject unrelated fast
+traffic. Warm detail caching substantially changes this workload without caching
+similar-ID lists. A concurrency-1 candidate worsened cold slow results (38.41% to
+50.11% non-200) and was discarded. No coalescing, retry, breaker or production
+default change was retained.
+
+Trace evidence distinguishes the 32 active-connection cap from the 64 configured
+pending admission policy: the internal pending counter transiently reached 87 before
+drain/rejection. It is not an atomic memory/admission ceiling. Public admission and
+per-route fairness remain unimplemented; no second semaphore was added speculatively.
+Short-run CPU/heap/GC measurements show no demonstrated CPU/GC bottleneck, but do
+not establish a long-run leak bound or an entry-to-byte cache budget. See
+[M04 evidence and limitations](m04-performance-verification.md). Any future tuning
+needs explicit success/freshness targets and a comparable measured experiment.
+
 ## Test boundaries
 
 - M00: JUnit 5 Boot context test starts real Netty on a random port and uses

@@ -1,0 +1,73 @@
+{
+  "official": {
+    "responses": 17022,
+    "first_response_utc": "2026-11-11T02:43:22.527910+00:00",
+    "exact_request_starts": null,
+    "iterations_completed": 16427,
+    "iterations_interrupted": 600,
+    "k6_exit_code": 0,
+    "point_source": "InfluxDB http_req_duration; one completed HTTP sample per row"
+  },
+  "cold-normal": {
+    "label": "cold-normal",
+    "source": 1,
+    "cache": "empty",
+    "start_epoch": 1794365081.51699,
+    "end_epoch": 1794365094.287394,
+    "exit_code": 0,
+    "overrides": [],
+    "requests_started": 3818,
+    "requests_completed": 3818,
+    "invalid_responses": 0
+  },
+  "warm-normal": {
+    "label": "warm-normal",
+    "source": 1,
+    "cache": "warm",
+    "start_epoch": 1794365103.0141902,
+    "end_epoch": 1794365115.631664,
+    "exit_code": 0,
+    "overrides": [],
+    "requests_started": 3865,
+    "requests_completed": 3865,
+    "invalid_responses": 0
+  },
+  "cold-slow": {
+    "label": "cold-slow",
+    "source": 2,
+    "cache": "empty",
+    "start_epoch": 1794365124.133999,
+    "end_epoch": 1794365137.056826,
+    "exit_code": 0,
+    "overrides": [],
+    "requests_started": 2994,
+    "requests_completed": 2994,
+    "invalid_responses": 0
+  },
+  "warm-slow": {
+    "label": "warm-slow",
+    "source": 2,
+    "cache": "warm",
+    "start_epoch": 1794365145.692759,
+    "end_epoch": 1794365159.963404,
+    "exit_code": 0,
+    "overrides": [],
+    "requests_started": 3802,
+    "requests_completed": 3802,
+    "invalid_responses": 0
+  },
+  "candidate-serial-slow": {
+    "label": "candidate-serial-slow",
+    "source": 2,
+    "cache": "empty",
+    "start_epoch": 1794365846.2724638,
+    "end_epoch": 1794365859.140532,
+    "exit_code": 0,
+    "overrides": [
+      "--upstream.max-concurrency=1"
+    ],
+    "requests_started": 2768,
+    "requests_completed": 2768,
+    "invalid_responses": 0
+  }
+}

@@ -35,7 +35,9 @@ implementation-specific. M03 adds timeout 504 and bounded-pool admission rejecti
    No latency SLO is supplied. Engineering defaults are connect 1 s, acquisition
    500 ms, read inactivity 6 s, complete call 7 s and total execution 10 s. The
    50-second fixture fails the whole operation with 504; no omission or retry.
-   M04 must measure these defaults before any tuning or agreed target claims.
+   M04 measured these defaults: normal cold startup and slow cold traffic reject
+   some requests; warm runs succeed. A concurrency-1 candidate performed worse
+   and was discarded. No new SLO or larger resource limit was agreed.
 5. **ID compatibility (resolved in M02):** Non-empty strings stay unchanged;
    exact integral numbers normalize to strings (including decimal/exponent notation
    with integral value). All other types/fractional values fail. Detail identity
@@ -44,9 +46,12 @@ implementation-specific. M03 adds timeout 504 and bounded-pool admission rejecti
    occurrence. M02 rejects mismatched detail identities.
    OpenAPI `uniqueItems` compares array values, not product identity. What maximum
    list size and runtime concurrency value should bound buffering and upstream
-   pressure? M02 configures a positive per-request cap, default 4; M04 must measure
-   its operating value. M03 globally bounds the fixed-origin connection pool to
-   32 active/64 pending, retaining codec body limits. Maximum contractual list size,
+   pressure? Per-request concurrency stays 4 after M04 measurements. The shared
+   pool caps active connections at 32 with pending admission policy 64; M04 traced
+   a transient pending counter of 87 during concurrent enqueue/drain. This is not
+   a strict atomic pending/heap ceiling. Should public admission or dependency
+   fairness receive a separate requirement? Codec body limits are retained.
+   Maximum contractual list size,
    total public demand and an explicit byte-based memory budget remain open.
 7. **Cache freshness (M03 provisional decision):** Successful details only,
    maximum 1,000 entries, 30 s expire-after-write. No absence, error, ID-list or
@@ -54,11 +59,17 @@ implementation-specific. M03 adds timeout 504 and bounded-pool admission rejecti
    after insertion; the contract supplies no freshness SLA or version information.
    Independent concurrent misses can complete in any order: the last valid write
    wins, without proving that its upstream value is newest. Is this freshness
-   trade-off acceptable? Measure cold/warm behavior in M04 before changing TTL,
-   adding coalescing or considering a breaker for persistent outages.
-8. **Performance acceptance (M04):** Which latency percentiles, error rate and
-   throughput targets should be used? Supplied k6 has neither thresholds nor
-   correctness checks. Record agreed targets separately and preserve the script.
+   trade-off acceptable? M04 cold/warm comparison confirms useful caching and
+   duplicate-miss pressure; it does not establish an acceptable freshness window.
+   Reliable coalescing/cancellation and version ordering need deliberate design
+   before changing this policy. No breaker or TTL change was added.
+8. **Performance acceptance (M04 measured, targets open):** Which latency
+   percentiles, error rate and throughput targets should be used? The official
+   supplied k6 run completed but defines neither thresholds nor correctness checks.
+   Cold normal had 3.92% non-200 and slow 36.32%; warm diagnostics had none.
+   Most verySlow 504s were too early to establish the intended read-timeout path;
+   status alone is insufficient. Single-run, emulated-host measurements cannot
+   establish an SLO. Preserve the script and agree targets separately.
 
 M00's Docker blocker is resolved in this M02 session: simulado started and live
 responses were inspected, including generic unmatched-route 404 and delays near
@@ -72,3 +83,10 @@ the 50-second detail now returns 504 in about 6 seconds. Missing-detail 404, det
 500 -> 502 and generic unknown-source 404 -> 502 remain unchanged. A separate
 200 ms total-budget override also terminates slow work with 504. These smoke checks
 are correctness evidence, not throughput or percentile measurements. No k6 run yet.
+
+M04 is now executed: [report](m04-performance-verification.md) and compact raw
+[evidence](../performance/README.md). The historical statements above describe M02/M03
+at their completion; the benchmark is no longer deferred. Port 5000 was released
+through supported AirPlay Receiver settings (now disabled); the official target was
+unchanged. No production optimization or default change was retained. M05/M06 have
+not started.

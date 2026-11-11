@@ -1,0 +1,460 @@
+{
+  "official": {
+    "normal": {
+      "completed": 3749,
+      "statuses": {
+        "503": 147,
+        "200": 3602
+      },
+      "expected_status": 200,
+      "classification": "Status comparison only; matching 504 does not identify timeout stage",
+      "matching_status_count": 3602,
+      "other_status_count": 147,
+      "other_status_percent": 3.921,
+      "transport_status_zero": 0,
+      "timeout_504": 0,
+      "timeout_504_under_2s": 0,
+      "timeout_504_at_least_2s": 0,
+      "unavailable_503": 147,
+      "scheduled_window_seconds": 10,
+      "completions_per_10s": 374.9,
+      "observed_http_span_seconds": 9.944445,
+      "observed_span_rps": 376.994,
+      "mean_ms": 29.672,
+      "median_ms": 15.453,
+      "p90_ms": 68.341,
+      "p95_ms": 104.239,
+      "max_ms": 325.517,
+      "latency_by_status": {
+        "503": {
+          "mean_ms": 131.848,
+          "median_ms": 129.888,
+          "p90_ms": 180.488,
+          "p95_ms": 193.027,
+          "max_ms": 202.825
+        },
+        "200": {
+          "mean_ms": 25.503,
+          "median_ms": 13.585,
+          "p90_ms": 60.5,
+          "p95_ms": 73.761,
+          "max_ms": 325.517
+        }
+      },
+      "first_second_statuses": {
+        "503": 147,
+        "200": 253
+      }
+    },
+    "notFound": {
+      "completed": 3986,
+      "statuses": {
+        "404": 3986
+      },
+      "expected_status": 404,
+      "classification": "Status comparison only; matching 504 does not identify timeout stage",
+      "matching_status_count": 3986,
+      "other_status_count": 0,
+      "other_status_percent": 0.0,
+      "transport_status_zero": 0,
+      "timeout_504": 0,
+      "timeout_504_under_2s": 0,
+      "timeout_504_at_least_2s": 0,
+      "unavailable_503": 0,
+      "scheduled_window_seconds": 10,
+      "completions_per_10s": 398.6,
+      "observed_http_span_seconds": 10.000831,
+      "observed_span_rps": 398.567,
+      "mean_ms": 8.997,
+      "median_ms": 3.886,
+      "p90_ms": 21.38,
+      "p95_ms": 35.035,
+      "max_ms": 129.095,
+      "latency_by_status": {
+        "404": {
+          "mean_ms": 8.997,
+          "median_ms": 3.886,
+          "p90_ms": 21.38,
+          "p95_ms": 35.035,
+          "max_ms": 129.095
+        }
+      },
+      "first_second_statuses": {
+        "404": 400
+      }
+    },
+    "error": {
+      "completed": 3993,
+      "statuses": {
+        "502": 3989,
+        "503": 4
+      },
+      "expected_status": 502,
+      "classification": "Status comparison only; matching 504 does not identify timeout stage",
+      "matching_status_count": 3989,
+      "other_status_count": 4,
+      "other_status_percent": 0.1,
+      "transport_status_zero": 0,
+      "timeout_504": 0,
+      "timeout_504_under_2s": 0,
+      "timeout_504_at_least_2s": 0,
+      "unavailable_503": 4,
+      "scheduled_window_seconds": 10,
+      "completions_per_10s": 399.3,
+      "observed_http_span_seconds": 9.989789,
+      "observed_span_rps": 399.708,
+      "mean_ms": 13.139,
+      "median_ms": 4.96,
+      "p90_ms": 44.864,
+      "p95_ms": 57.985,
+      "max_ms": 124.39,
+      "latency_by_status": {
+        "502": {
+          "mean_ms": 13.124,
+          "median_ms": 4.957,
+          "p90_ms": 44.879,
+          "p95_ms": 57.991,
+          "max_ms": 124.39
+        },
+        "503": {
+          "mean_ms": 27.993,
+          "median_ms": 28.06,
+          "p90_ms": 29.316,
+          "p95_ms": 29.497,
+          "max_ms": 29.678
+        }
+      },
+      "first_second_statuses": {
+        "502": 396,
+        "503": 4
+      }
+    },
+    "slow": {
+      "completed": 3089,
+      "statuses": {
+        "503": 740,
+        "504": 382,
+        "200": 1967
+      },
+      "expected_status": 200,
+      "classification": "Status comparison only; matching 504 does not identify timeout stage",
+      "matching_status_count": 1967,
+      "other_status_count": 1122,
+      "other_status_percent": 36.322,
+      "transport_status_zero": 0,
+      "timeout_504": 382,
+      "timeout_504_under_2s": 382,
+      "timeout_504_at_least_2s": 0,
+      "unavailable_503": 740,
+      "scheduled_window_seconds": 10,
+      "completions_per_10s": 308.9,
+      "observed_http_span_seconds": 9.904061,
+      "observed_span_rps": 311.892,
+      "mean_ms": 151.934,
+      "median_ms": 4.373,
+      "p90_ms": 503.881,
+      "p95_ms": 509.087,
+      "max_ms": 5799.521,
+      "latency_by_status": {
+        "503": {
+          "mean_ms": 87.882,
+          "median_ms": 8.227,
+          "p90_ms": 465.358,
+          "p95_ms": 491.549,
+          "max_ms": 1012.75
+        },
+        "504": {
+          "mean_ms": 530.032,
+          "median_ms": 505.784,
+          "p90_ms": 516.449,
+          "p95_ms": 538.414,
+          "max_ms": 1016.857
+        },
+        "200": {
+          "mean_ms": 102.603,
+          "median_ms": 2.972,
+          "p90_ms": 11.97,
+          "p95_ms": 26.724,
+          "max_ms": 5799.521
+        }
+      },
+      "first_second_statuses": {
+        "503": 198,
+        "504": 61
+      }
+    },
+    "verySlow": {
+      "completed": 2205,
+      "statuses": {
+        "503": 1206,
+        "504": 999
+      },
+      "expected_status": 504,
+      "classification": "Status comparison only; matching 504 does not identify timeout stage",
+      "matching_status_count": 999,
+      "other_status_count": 1206,
+      "other_status_percent": 54.694,
+      "transport_status_zero": 0,
+      "timeout_504": 999,
+      "timeout_504_under_2s": 935,
+      "timeout_504_at_least_2s": 64,
+      "unavailable_503": 1206,
+      "scheduled_window_seconds": 10,
+      "completions_per_10s": 220.5,
+      "observed_http_span_seconds": 12.069205,
+      "observed_span_rps": 182.696,
+      "mean_ms": 465.726,
+      "median_ms": 501.264,
+      "p90_ms": 516.595,
+      "p95_ms": 527.312,
+      "max_ms": 6413.619,
+      "latency_by_status": {
+        "503": {
+          "mean_ms": 127.273,
+          "median_ms": 8.022,
+          "p90_ms": 500.519,
+          "p95_ms": 504.348,
+          "max_ms": 811.54
+        },
+        "504": {
+          "mean_ms": 874.309,
+          "median_ms": 506.028,
+          "p90_ms": 528.259,
+          "p95_ms": 6018.474,
+          "max_ms": 6413.619
+        }
+      },
+      "first_second_statuses": {
+        "503": 144,
+        "504": 64
+      }
+    }
+  },
+  "cold-normal": {
+    "completed": 3818,
+    "statuses": {
+      "503": 107,
+      "200": 3711
+    },
+    "expected_status": 200,
+    "classification": "Status comparison only; matching 504 does not identify timeout stage",
+    "matching_status_count": 3711,
+    "other_status_count": 107,
+    "other_status_percent": 2.803,
+    "transport_status_zero": 0,
+    "timeout_504": 0,
+    "timeout_504_under_2s": 0,
+    "timeout_504_at_least_2s": 0,
+    "unavailable_503": 107,
+    "scheduled_window_seconds": 10,
+    "completions_per_10s": 381.8,
+    "observed_http_span_seconds": 9.938267,
+    "observed_span_rps": 384.172,
+    "mean_ms": 20.658,
+    "median_ms": 5.732,
+    "p90_ms": 56.902,
+    "p95_ms": 88.764,
+    "max_ms": 347.027,
+    "latency_by_status": {
+      "503": {
+        "mean_ms": 160.38,
+        "median_ms": 163.863,
+        "p90_ms": 213.306,
+        "p95_ms": 216.438,
+        "max_ms": 223.005
+      },
+      "200": {
+        "mean_ms": 16.629,
+        "median_ms": 5.292,
+        "p90_ms": 47.971,
+        "p95_ms": 66.95,
+        "max_ms": 347.027
+      }
+    },
+    "first_second_statuses": {
+      "503": 107,
+      "200": 293
+    }
+  },
+  "warm-normal": {
+    "completed": 3865,
+    "statuses": {
+      "200": 3865
+    },
+    "expected_status": 200,
+    "classification": "Status comparison only; matching 504 does not identify timeout stage",
+    "matching_status_count": 3865,
+    "other_status_count": 0,
+    "other_status_percent": 0.0,
+    "transport_status_zero": 0,
+    "timeout_504": 0,
+    "timeout_504_under_2s": 0,
+    "timeout_504_at_least_2s": 0,
+    "unavailable_503": 0,
+    "scheduled_window_seconds": 10,
+    "completions_per_10s": 386.5,
+    "observed_http_span_seconds": 9.881049,
+    "observed_span_rps": 391.153,
+    "mean_ms": 16.301,
+    "median_ms": 5.209,
+    "p90_ms": 50.871,
+    "p95_ms": 72.622,
+    "max_ms": 168.696,
+    "latency_by_status": {
+      "200": {
+        "mean_ms": 16.301,
+        "median_ms": 5.209,
+        "p90_ms": 50.871,
+        "p95_ms": 72.622,
+        "max_ms": 168.696
+      }
+    },
+    "first_second_statuses": {
+      "200": 400
+    }
+  },
+  "cold-slow": {
+    "completed": 2994,
+    "statuses": {
+      "503": 851,
+      "504": 299,
+      "200": 1844
+    },
+    "expected_status": 200,
+    "classification": "Status comparison only; matching 504 does not identify timeout stage",
+    "matching_status_count": 1844,
+    "other_status_count": 1150,
+    "other_status_percent": 38.41,
+    "transport_status_zero": 0,
+    "timeout_504": 299,
+    "timeout_504_under_2s": 299,
+    "timeout_504_at_least_2s": 0,
+    "unavailable_503": 851,
+    "scheduled_window_seconds": 10,
+    "completions_per_10s": 299.4,
+    "observed_http_span_seconds": 9.918258,
+    "observed_span_rps": 301.868,
+    "mean_ms": 168.515,
+    "median_ms": 10.067,
+    "p90_ms": 521.089,
+    "p95_ms": 554.175,
+    "max_ms": 5533.098,
+    "latency_by_status": {
+      "503": {
+        "mean_ms": 180.476,
+        "median_ms": 64.542,
+        "p90_ms": 557.639,
+        "p95_ms": 606.604,
+        "max_ms": 707.901
+      },
+      "504": {
+        "mean_ms": 523.616,
+        "median_ms": 517.248,
+        "p90_ms": 551.986,
+        "p95_ms": 558.61,
+        "max_ms": 584.207
+      },
+      "200": {
+        "mean_ms": 105.417,
+        "median_ms": 2.878,
+        "p90_ms": 30.268,
+        "p95_ms": 46.222,
+        "max_ms": 5533.098
+      }
+    },
+    "first_second_statuses": {
+      "503": 290
+    }
+  },
+  "warm-slow": {
+    "completed": 3802,
+    "statuses": {
+      "200": 3802
+    },
+    "expected_status": 200,
+    "classification": "Status comparison only; matching 504 does not identify timeout stage",
+    "matching_status_count": 3802,
+    "other_status_count": 0,
+    "other_status_percent": 0.0,
+    "transport_status_zero": 0,
+    "timeout_504": 0,
+    "timeout_504_under_2s": 0,
+    "timeout_504_at_least_2s": 0,
+    "unavailable_503": 0,
+    "scheduled_window_seconds": 10,
+    "completions_per_10s": 380.2,
+    "observed_http_span_seconds": 9.896496,
+    "observed_span_rps": 384.176,
+    "mean_ms": 18.412,
+    "median_ms": 3.337,
+    "p90_ms": 50.259,
+    "p95_ms": 115.149,
+    "max_ms": 325.004,
+    "latency_by_status": {
+      "200": {
+        "mean_ms": 18.412,
+        "median_ms": 3.337,
+        "p90_ms": 50.259,
+        "p95_ms": 115.149,
+        "max_ms": 325.004
+      }
+    },
+    "first_second_statuses": {
+      "200": 400
+    }
+  },
+  "candidate-serial-slow": {
+    "completed": 2768,
+    "statuses": {
+      "503": 906,
+      "504": 481,
+      "200": 1381
+    },
+    "expected_status": 200,
+    "classification": "Status comparison only; matching 504 does not identify timeout stage",
+    "matching_status_count": 1381,
+    "other_status_count": 1387,
+    "other_status_percent": 50.108,
+    "transport_status_zero": 0,
+    "timeout_504": 481,
+    "timeout_504_under_2s": 470,
+    "timeout_504_at_least_2s": 11,
+    "unavailable_503": 906,
+    "scheduled_window_seconds": 10,
+    "completions_per_10s": 276.8,
+    "observed_http_span_seconds": 9.942531,
+    "observed_span_rps": 278.4,
+    "mean_ms": 232.392,
+    "median_ms": 11.812,
+    "p90_ms": 506.874,
+    "p95_ms": 561.975,
+    "max_ms": 6631.229,
+    "latency_by_status": {
+      "503": {
+        "mean_ms": 170.584,
+        "median_ms": 14.034,
+        "p90_ms": 501.753,
+        "p95_ms": 634.844,
+        "max_ms": 1822.424
+      },
+      "504": {
+        "mean_ms": 568.906,
+        "median_ms": 504.73,
+        "p90_ms": 573.399,
+        "p95_ms": 769.572,
+        "max_ms": 2034.228
+      },
+      "200": {
+        "mean_ms": 155.733,
+        "median_ms": 2.999,
+        "p90_ms": 54.703,
+        "p95_ms": 254.432,
+        "max_ms": 6631.229
+      }
+    },
+    "first_second_statuses": {
+      "503": 210,
+      "504": 5
+    }
+  }
+}

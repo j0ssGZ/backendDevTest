@@ -1,0 +1,21 @@
+running (1m02.6s), 000/200 VUs, 16427 complete and 600 interrupted iterations
+normal   ✓ [ 100% ] 200 VUs  10s
+notFound ✓ [ 100% ] 200 VUs  10s
+error    ✓ [ 100% ] 200 VUs  10s
+slow     ✓ [ 100% ] 200 VUs  10s
+verySlow ✓ [ 100% ] 200 VUs  10s
+
+    data_received..............: 2.0 MB 32 kB/s
+    data_sent..................: 1.8 MB 29 kB/s
+    http_req_blocked...........: avg=863.69µs min=4µs      med=411µs    max=120.33ms p(90)=781µs    p(95)=947µs
+    http_req_connecting........: avg=130.91µs min=0s       med=0s       max=71.41ms  p(90)=0s       p(95)=0s
+    http_req_duration..........: avg=99.62ms  min=301µs    med=5.76ms   max=6.41s    p(90)=486.42ms p(95)=505.21ms
+    http_req_receiving.........: avg=821.06µs min=12µs     med=693µs    max=63.9ms   p(90)=1.44ms   p(95)=1.81ms
+    http_req_sending...........: avg=2.18ms   min=6µs      med=421µs    max=88.05ms  p(90)=5.66ms   p(95)=13.5ms
+    http_req_tls_handshaking...: avg=0s       min=0s       med=0s       max=0s       p(90)=0s       p(95)=0s
+    http_req_waiting...........: avg=96.61ms  min=266µs    med=4.06ms   max=6.4s     p(90)=485.1ms  p(95)=502.71ms
+    http_reqs..................: 17022  271.8497/s
+    iteration_duration.........: avg=608.6ms  min=500.66ms med=509.54ms max=6.91s    p(90)=997.53ms p(95)=1.01s
+    iterations.................: 16427  262.347258/s
+    vus........................: 32     min=0   max=200
+    vus_max....................: 200    min=200 max=200

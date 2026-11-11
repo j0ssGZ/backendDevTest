@@ -1,0 +1,181 @@
+{
+  "preload-smoke": [
+    {
+      "source": 1,
+      "status": 200,
+      "seconds": 0.229593,
+      "valid": true,
+      "body": "[{\"id\":\"2\",\"name\":\"Dress\",\"price\":19.99,\"availability\":true},{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"4\",\"name\":\"Boots\",\"price\":39.99,\"availability\":true}]"
+    },
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 5.023791,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    },
+    {
+      "source": 3,
+      "status": 504,
+      "seconds": 6.045339,
+      "valid": true,
+      "body": ""
+    },
+    {
+      "source": 4,
+      "status": 404,
+      "seconds": 0.02273,
+      "valid": true,
+      "body": ""
+    },
+    {
+      "source": 5,
+      "status": 502,
+      "seconds": 0.019966,
+      "valid": true,
+      "body": ""
+    }
+  ],
+  "post-official": [
+    {
+      "source": 1,
+      "status": 200,
+      "seconds": 0.123466,
+      "valid": true,
+      "body": "[{\"id\":\"2\",\"name\":\"Dress\",\"price\":19.99,\"availability\":true},{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"4\",\"name\":\"Boots\",\"price\":39.99,\"availability\":true}]"
+    },
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 1.023446,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    },
+    {
+      "source": 3,
+      "status": 504,
+      "seconds": 6.024612,
+      "valid": true,
+      "body": ""
+    },
+    {
+      "source": 4,
+      "status": 404,
+      "seconds": 0.029182,
+      "valid": true,
+      "body": ""
+    },
+    {
+      "source": 5,
+      "status": 502,
+      "seconds": 0.017037,
+      "valid": true,
+      "body": ""
+    }
+  ],
+  "cold-normal-recovery": [
+    {
+      "source": 1,
+      "status": 200,
+      "seconds": 0.020154,
+      "valid": true,
+      "body": "[{\"id\":\"2\",\"name\":\"Dress\",\"price\":19.99,\"availability\":true},{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"4\",\"name\":\"Boots\",\"price\":39.99,\"availability\":true}]"
+    },
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 5.042828,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    }
+  ],
+  "warm-normal-recovery": [
+    {
+      "source": 1,
+      "status": 200,
+      "seconds": 0.020532,
+      "valid": true,
+      "body": "[{\"id\":\"2\",\"name\":\"Dress\",\"price\":19.99,\"availability\":true},{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"4\",\"name\":\"Boots\",\"price\":39.99,\"availability\":true}]"
+    },
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 5.023092,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    }
+  ],
+  "cold-slow-recovery": [
+    {
+      "source": 1,
+      "status": 200,
+      "seconds": 0.020376,
+      "valid": true,
+      "body": "[{\"id\":\"2\",\"name\":\"Dress\",\"price\":19.99,\"availability\":true},{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"4\",\"name\":\"Boots\",\"price\":39.99,\"availability\":true}]"
+    },
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 0.012853,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    }
+  ],
+  "warm-slow-recovery": [
+    {
+      "source": 1,
+      "status": 200,
+      "seconds": 0.022766,
+      "valid": true,
+      "body": "[{\"id\":\"2\",\"name\":\"Dress\",\"price\":19.99,\"availability\":true},{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"4\",\"name\":\"Boots\",\"price\":39.99,\"availability\":true}]"
+    },
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 0.01198,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    }
+  ],
+  "resource-trace-recovery": [
+    {
+      "source": 1,
+      "status": 200,
+      "seconds": 0.013581,
+      "valid": true,
+      "body": "[{\"id\":\"2\",\"name\":\"Dress\",\"price\":19.99,\"availability\":true},{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"4\",\"name\":\"Boots\",\"price\":39.99,\"availability\":true}]"
+    },
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 0.010394,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    }
+  ],
+  "resource-trace-expired": [
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 5.057841,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    }
+  ],
+  "candidate-serial-slow-recovery": [
+    {
+      "source": 1,
+      "status": 200,
+      "seconds": 0.020401,
+      "valid": true,
+      "body": "[{\"id\":\"2\",\"name\":\"Dress\",\"price\":19.99,\"availability\":true},{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"4\",\"name\":\"Boots\",\"price\":39.99,\"availability\":true}]"
+    },
+    {
+      "source": 2,
+      "status": 200,
+      "seconds": 0.010729,
+      "valid": true,
+      "body": "[{\"id\":\"3\",\"name\":\"Blazer\",\"price\":29.99,\"availability\":false},{\"id\":\"100\",\"name\":\"Trousers\",\"price\":49.99,\"availability\":false},{\"id\":\"1000\",\"name\":\"Coat\",\"price\":89.99,\"availability\":true}]"
+    }
+  ]
+}

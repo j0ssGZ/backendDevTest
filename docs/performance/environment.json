@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-11",
+  "application_commit": "90f96f31e5a8731fec1dd17b9bc7b043a713cedf",
+  "java": "OpenJDK Zulu 21.0.13.0.3+1-LTS, 64-bit Server VM, mixed mode, sharing",
+  "spring_boot": "3.5.16",
+  "os": "macOS 27.2 (26B123)",
+  "cpu": "Apple M5, arm64",
+  "physical_cores": 10,
+  "logical_cores": 10,
+  "physical_memory_bytes": 17179869184,
+  "jvm": {
+    "heap_flags_explicitly_overridden": false,
+    "initial_heap_bytes": 268435456,
+    "maximum_heap_bytes": 4294967296,
+    "collector": "G1",
+    "g1_region_bytes": 2097152,
+    "compiler_threads": 4,
+    "concurrent_gc_threads": 2,
+    "extra_observation": "GC log and local JMX sampler; no production code or dependencies added"
+  },
+  "docker_client_server": "29.7.2 / 29.7.2",
+  "compose": "v5.5.1",
+  "docker_vm_cpus": 10,
+  "docker_vm_memory_bytes": 8319504384,
+  "k6": "0.28.0 (go1.14.9, linux/amd64)",
+  "image_architectures": {
+    "loadimpact/k6:0.28.0": "amd64 (emulated)",
+    "ldabiralai/simulado:latest": "amd64 (emulated)",
+    "influxdb:1.8.2": "arm64",
+    "grafana/grafana:8.1.2": "arm64"
+  },
+  "application": {
+    "port": 5000,
+    "upstream_base_url": "http://localhost:3001",
+    "detail_concurrency_per_request": 4,
+    "pool_max_connections": 32,
+    "pool_max_pending_acquisitions": 64,
+    "connect_timeout_ms": 1000,
+    "acquire_timeout_ms": 500,
+    "response_timeout_ms": 6000,
+    "call_timeout_ms": 7000,
+    "request_timeout_ms": 10000,
+    "max_idle_ms": 30000,
+    "eviction_interval_ms": 15000,
+    "cache_entries": 1000,
+    "cache_ttl_ms": 30000,
+    "cache_enabled": true,
+    "automatic_retries": false
+  },
+  "port_resolution": {
+    "original_listener": "User-owned macOS ControlCenter service",
+    "method": "System Settings > General > AirDrop and Continuity > AirPlay Receiver; local authentication requested",
+    "verified_airplay_receiver_enabled": false,
+    "restored": false,
+    "restoration": "Enable AirPlay Receiver again in the same supported Settings panel when port 5000 is no longer needed",
+    "system_service_terminated": false
+  }
+}
