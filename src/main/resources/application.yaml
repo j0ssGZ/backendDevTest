@@ -3,3 +3,4 @@ server:
 
 upstream:
   base-url: ${UPSTREAM_BASE_URL:http://localhost:3001}
+  max-concurrency: ${UPSTREAM_MAX_CONCURRENCY:4}

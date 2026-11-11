@@ -50,16 +50,33 @@ dependencies; application imports no HTTP adapters. No real HTTP integration yet
 Delivery: one commit `feat: implement similar-products domain and use case`,
 push to `origin/main`, inspect CI once and stop. M02 requires explicit approval.
 
-## M02 — WebFlux REST and HTTP adapters
+## M02 — WebFlux REST and HTTP adapters (completed)
 
-Wire controller, boundary mapping, WebClient adapter and typed configuration.
-Implement approved status mappings and explicit numeric mock ID compatibility.
+- [x] Thin GET controller with exact four-field JSON boundary and no orchestration
+  duplicated outside the existing use case.
+- [x] WebClient adapter for both outbound ports, strict JSON validation, exact
+  decimal handling, local ID normalization, encoded URI variables and identity checks.
+- [x] Typed infrastructure properties and wiring; existing URL configuration
+  retained, positive per-request concurrency configurable with default 4.
+- [x] Explicit empty-body error mappings without source-existence inference,
+  retries, omission fallback, caching or application-interface changes.
+- [x] Automated controller, local HTTP adapter, wiring and Spring integration tests.
+- [x] `./mvnw clean verify`: **121 tests passed**, zero failures/errors/skips.
+  The 31 existing tests remain unchanged; 90 new parameterized cases cover M02.
+- [x] Supplied simulado started; actual normal, missing, 500, unknown and slow
+  responses inspected. A JAR started with SERVER_PORT=5001 and curl verified the
+  endpoint against Docker, including successful ordered results and error mappings.
+- [x] Evidence and remaining M03 questions recorded in
+  [M02 verification](m02-verification.md). Full benchmark remains deferred to M04.
 
 Acceptance: WebTestClient verifies the supplied successful JSON contract, route,
 content type, required types and ordering; stub HTTP tests cover exact upstream
 paths, decoding and agreed 404/500/error semantics. Runtime URL override works.
 An end-to-end request with supplied mocks works when Docker is available. Supplied
 contracts and fixtures remain unchanged.
+
+Delivery: commit `feat: expose similar-products REST API with WebClient`, push to
+`origin/main`, inspect CI once and stop. M03 requires explicit user approval.
 
 ## M03 — Resilience and caching
 

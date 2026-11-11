@@ -38,10 +38,11 @@ or Spring configuration. Keep one product HTTP adapter implementing both outboun
 ports initially; split it only if responsibilities actually diverge. Use explicit
 boundary DTOs where needed to isolate JSON coercion and error semantics.
 
-## Planned package layout
+## Package layout
 
-M00 created the entry point, YAML and context test. Domain and application paths
-are implemented in M01; infrastructure paths below remain planned for M02.
+M00 created the entry point, YAML and context test; M01 implemented the domain
+and application. M02 implements the infrastructure below without changing either
+inner layer or its port interfaces.
 
 ```text
 src/main/java/com/example/similarproducts/
@@ -56,8 +57,10 @@ src/main/java/com/example/similarproducts/
   infrastructure/
     rest/SimilarProductsController.java
     rest/ProductResponse.java
+    rest/ApiExceptionHandler.java
     http/ProductApiClient.java
-    http/UpstreamProductResponse.java
+    http/UpstreamPayloadDecoder.java
+    http/UpstreamException.java
     config/UpstreamProperties.java
     config/ProductConfiguration.java
 src/main/resources/application.yaml
@@ -71,7 +74,57 @@ src/test/java/com/example/similarproducts/
 No empty packages, placeholder implementations, multi-module build or generic
 repository abstraction is needed. The upstream URL is already configurable via
 `UPSTREAM_BASE_URL` (default `http://localhost:3001`) or `upstream.base-url`.
-Typed properties and HTTP client configuration arrive with M02.
+M02 supplies typed properties and HTTP client wiring in infrastructure.
+
+## M02 REST and upstream boundaries
+
+The thin controller delegates `GET /product/{productId}/similar` to the use case
+and maps Product to ProductResponse. The explicit response record has only `id`,
+`name`, `price`, `availability`; ordering and orchestration remain in application.
+
+One ProductApiClient implements both outbound ports with WebClient. It requests
+`/product/{productId}/similarids` and `/product/{productId}` using URI-template
+variables and explicit `TEMPLATE_AND_VALUES` encoding, preserving IDs as single
+segments (including slashes, spaces, Unicode and literal percent signs). Configured
+base-path prefixes are supported. Requests advertise JSON. `exchangeToMono` handles
+status-specific decoding and releases bodies; only detail 404 completes empty.
+
+Successful upstream responses must be 200 with `application/json` or an application
+media type ending in `+json`, optionally with charset parameters. Empty bodies are
+invalid. A local immutable Jackson ObjectReader checks the JSON tree, rejects
+duplicate object keys/trailing root values and reads decimals as BigDecimal without
+scale conversion. No global Jackson coercion settings change. Explicit tree checks
+replace the originally planned upstream DTO: JSON types and required-field presence
+must be checked before constructing a Product, especially missing availability versus
+false. Unknown upstream fields are ignored and cannot enter the public response.
+
+ID strings are non-empty and preserved verbatim; mathematically integral numbers
+are converted with `toBigIntegerExact()` (including `2.0`/`2e0`, without lossy double
+conversion). Fractional numbers and other JSON types fail. The normalized detail ID
+must exactly equal the requested string ID; `2` does not silently replace `"002"`.
+
+UpstreamException retains kind, upstream status when present, and original transport,
+HTTP or parser cause. Application passes it through unchanged. The REST advice emits
+empty error bodies: missing similar detail -> 404; invalid payload/identity or
+unexpected upstream status -> 502; transport failure -> 503; unanticipated internal
+failure -> 500. Framework status exceptions retain their status without exposing
+their messages. The generic unknown-route 404 from `similarids` is a 502 dependency
+failure, not evidence for a new source-not-found rule. See the verification record.
+
+## Runtime configuration
+
+- `server.port`: default **5000**; `SERVER_PORT=5001` is a temporary local override.
+- `upstream.base-url`: `UPSTREAM_BASE_URL`, default `http://localhost:3001`.
+  Typed URI must be an absolute HTTP(S) base URL with host and no query/fragment.
+- `upstream.max-concurrency`: `UPSTREAM_MAX_CONCURRENCY`, default **4**, must be
+  positive. Four is a conservative starting cap per request, allowing the supplied
+  three-detail examples to overlap without unbounded fan-out. It is not a benchmark
+  result, a global concurrency limit, or a latency guarantee; tune in M04.
+
+Spring ProductConfiguration constructs the HTTP adapter and injects it into both
+application ports, then constructs the use case with the configured cap. No Spring
+annotations or infrastructure types enter the domain/application. No new dependency
+is needed for M02; loopback test servers use the existing Reactor Netty dependency.
 
 ## M01 port contracts
 
@@ -86,13 +139,13 @@ Typed properties and HTTP client configuration arrive with M02.
   original identity, type and cause, including errors thrown before returning a Mono.
 - Ports must return non-null publishers and support cancellation. No HTTP types or
   statuses appear in these contracts. The service is constructed directly with
-  both ports and a positive `maxConcurrency`; Spring wiring is deferred to M02.
+  both ports and a positive `maxConcurrency`; M02 supplies Spring wiring externally.
 
 `Product` is a Java record. ID, name and price are non-null; ID and name are
 non-empty, with no trimming/nonblank restriction. `BigDecimal` is retained without
 rounding or scale conversion; zero and negative values remain legal. Availability
-is a primitive boolean. JSON required-field/null validation, including distinguishing
-missing availability from `false`, belongs to the future adapter.
+is a primitive boolean. M02's HTTP decoder validates JSON required-field/null
+presence, including distinguishing missing availability from `false`.
 
 ## Execution and trade-offs
 
@@ -103,12 +156,12 @@ missing availability from `false`, belongs to the future adapter.
    Later completions buffer behind earlier details; ordinary `flatMap` would reorder
    results and `concatMap` would serialize latency. No operational default is hidden
    in the application: the caller supplies the positive limit through the constructor.
-   Tests exercise limits 1, 2 and 3. Choose the runtime value in M02 configuration,
-   then tune with measurements in M04. The service has only final configuration/port
+   Tests exercise limits 1, 2 and 3. M02 configuration supplies the runtime default 4;
+   tune with measurements in M04. The service has only final configuration/port
    fields; deduplication and collection state belong to each subscription.
 2. M01 collects the complete result with `collectList()` before emitting success.
-   Later, collect before writing the public response so a late failure can still map to
-   a coherent HTTP status. The contract returns a JSON array rather than a stream.
+   M02 maps it before committing the public response so a late failure can still
+   produce a coherent HTTP status. The contract returns a JSON array rather than a stream.
    This buffers the result; maximum upstream list size is an open question.
 3. Specify connection, response/read and overall request deadlines in M03,
    including pool acquisition and retry time within the total budget. The 50-second
@@ -117,16 +170,17 @@ missing availability from `false`, belongs to the future adapter.
 4. M01 provisionally fails fast for missing or failed details, including an error
    from a later lookup while an earlier lookup is pending. It propagates the original
    error or creates a typed missing-detail error for empty detail completion. No
-   placeholders, partial/empty-success fallback or HTTP status mapping is introduced.
+   placeholders or successful omission fallback are introduced; application itself
+   remains free of HTTP status mappings.
    Cancellation and fail-fast termination cancel active publishers without starting
-   queued detail calls. No source-existence probe is invented. Future adapters must
-   distinguish lookup failure, missing detail, server error, timeout and malformed
-   JSON; agree externally visible mappings in M02/M03, independently of k6 labels.
+   queued detail calls. No source-existence probe is invented. M02 distinguishes
+   missing detail, status, transport and payload failures at the boundary, with
+   the mappings above. Deadline/fallback policy remains M03 work, independent of k6 labels.
 5. M01 deduplicates similar IDs before detail retrieval, retaining first occurrence.
-   Distinct IDs returning identical or mismatched details remain an upstream-boundary
-   question; no object-based deduplication is invented. Proposed numeric-ID
-   normalization remains confined to the future upstream adapter and must not
-   change the public string-ID contract.
+   M02 rejects mismatching identities at the HTTP boundary, so distinct requested
+   IDs cannot collapse onto identical product objects. Object-based deduplication
+   is unnecessary. Numeric-ID normalization stays confined to the upstream adapter,
+   preserving public string IDs.
 6. In M03 evaluate a bounded, expiring detail cache behind the detail port (decorator
    if useful). Successful values only initially; errors must not become long-lived
    cached absences. TTL, maximum entries, availability freshness, in-flight request
@@ -148,11 +202,14 @@ missing availability from `false`, belongs to the future adapter.
   Repeat subscriptions verify lazy independent state. No Spring context, HTTP,
   Docker, real sleeps, schedulers or execution-timing assumptions are involved.
   `reactor-test` is the only new dependency, test scoped and versioned by Boot.
-- REST: WebTestClient slice tests with a stub use case assert route, status,
-  content type, exact fields, types and ordered array semantics.
-- HTTP adapter: local HTTP stub exercises paths, numeric-versus-string fixtures,
-  decoding, 404/500, malformed JSON and deadlines. Use a minimal test-only server;
-  choose additional test tooling only when needed.
+- M02 REST: controller-bound WebTestClient tests with a stub use case assert route,
+  content type, exact fields/types, ordering, error status and empty sanitized bodies.
+- M02 HTTP: Reactor Netty loopback stubs test encoded paths, numeric/string IDs,
+  exact decimals, strict types, 404/500, malformed JSON and disconnected server.
+  Spring integration tests exercise controller -> use case -> HTTP adapter on local
+  ports and environment placeholders. A controlled ExchangeFunction tests configured
+  concurrency deterministically, without scheduling assumptions or external network.
+  Deadline policies remain M03 work.
 - Resilience/cache: virtual time and controlled responses test expiration,
   cancellation, failure isolation and concurrent cache misses without real sleeps.
 - End to end: supplied Docker mocks plus original k6 script in M04. Retain results,

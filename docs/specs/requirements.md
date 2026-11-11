@@ -5,10 +5,11 @@
 The supplied `readme.md`, `similarProducts.yaml`, `existingApis.yaml`,
 `docker-compose.yaml`, `shared/simulado/mocks.json` and `shared/k6/test.js`
 are preserved. OpenAPI defines the HTTP contract; mock observations below do
-not silently amend it. M00 delivered bootstrap and planning; M01 implements
-domain values and application orchestration only. HTTP integration is deferred.
+not silently amend it. M00 delivered bootstrap and planning; M01 implemented
+domain/application behavior; M02 exposes the REST operation and connects its ports
+to the supplied upstream. Resilience/caching remain deferred to M03.
 
-## Required API behavior (future implementation)
+## Required API behavior
 
 - Listen on port **5000** and expose `GET /product/{productId}/similar`
   (`operationId: get-product-similar`). The required path parameter is a string;
@@ -75,6 +76,31 @@ OpenAPI behavior. Revisit failure policy in M02/M03 if verified evidence warrant
 - Fetch details with a positive constructor-supplied concurrency limit and preserve
   similarity order. Cancellation reaches active work; queued lookups are not started.
 - No HTTP status mapping, timeout, retries or cross-request caching is added in M01.
+
+## M02 boundary decisions
+
+- Public success is exactly the ordered JSON array of four-field products; no
+  upstream extra fields reach clients. A valid empty upstream array returns `[]`.
+- Upstream ID compatibility is local to the HTTP adapter: retain non-empty strings
+  verbatim, or convert exact integral JSON numbers to integer strings. Thus `2`,
+  `2.0` and `2e0` normalize to `"2"`; `"002"` stays `"002"`. Reject fractional
+  values, booleans, nulls, objects, arrays, empty strings and malformed JSON.
+- Validate required product fields and normalized identity against the requested
+  ID. Reject mismatches rather than rewriting IDs. Parse price as exact BigDecimal.
+- Provisional fail-fast remains: an individual detail 404 becomes the application
+  missing-detail error and public **404**, with an empty body. This does not assert
+  that the requested source is absent.
+- Other unexpected upstream statuses (including the generic similar-ID 404),
+  invalid payloads and identity mismatch produce **502**; transport/connection
+  failures produce **503**. Unexpected internal errors produce **500**. Error
+  bodies are empty. These additional statuses are implementation-specific behavior,
+  not amendments to the supplied public OpenAPI.
+- Live unknown-source lookup returns generic `404 text/plain: Not Found`; it does
+  not establish source-product absence. No existence probe or missing-source
+  detection mechanism is introduced. No retries or omission fallback is configured.
+
+See [M02 HTTP observations and verification](m02-verification.md) for actual
+Docker responses, test coverage and curl evidence.
 
 See [design](design.md), [milestones](tasks.md) and
 [unresolved decisions](open-questions.md).
