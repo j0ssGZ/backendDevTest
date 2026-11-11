@@ -135,15 +135,29 @@ remain untouched. AirPlay Receiver stays disabled so 5000 remains available.
 Delivery: commit the benchmark evidence, push to `origin/main`, inspect CI once and
 stop. M05 and M06 require explicit user approval.
 
-## M05 — Final technical audit and README
+## M05 — Final technical audit and README (completed)
 
-Audit implementation, contracts, architecture, tests and reproducibility. Add
-clear run/test/configuration instructions and technical decisions to the README.
+- [x] Review original requirements/contracts, all implementation boundaries and SDD;
+  classify compliance with source/test evidence and distinguish user constraints.
+- [x] Document accepted 404, freshness, cold-load, fairness and pending-counter
+  limitations without changing externally visible behavior or historical measurements.
+- [x] Rewrite README with exact run/build/test/configuration/k6/stop instructions,
+  verified JSON example, actual defaults and links to detailed evidence.
+- [x] Fresh HTTPS clone of M04 commit with no target output and empty wrapper/Maven
+  artifact caches: Maven 3.9.16, Java 21, dependency resolution and clean JAR build pass.
+- [x] All 166 tests pass; isolated clone-mounted Docker mock and default-port 5000
+  packaged-JAR integration pass. Optional 5001/deadline override and Maven run pass.
+- [x] Review source/dependency hygiene, tracked assets/secrets/generated files,
+  README links and version/test-count consistency; preserve supplied challenge assets.
+- [x] Record verdict **READY WITH DOCUMENTED LIMITATIONS** in
+  [final delivery audit](../qa/final-delivery-audit.md); no benchmark rerun without need.
 
-Acceptance: clean wrapper build and tests pass; requirements trace to tests;
-M04 evidence is available; error/cache/timeout choices and remaining limitations
-are explicit; original challenge materials remain intact. No TODO behavior is
-presented as completed. README enables a fresh checkout to run the app and benchmark.
+Acceptance: independent clean build and real integration pass; requirements trace
+into evidence and limitations remain explicit. Original README is replaced as
+requested; its brief remains in Git. No new feature, policy, dependency, CI or deployment.
+
+Delivery: commit `docs: finalize Java backend delivery audit`, push to `origin/main`,
+inspect CI once and stop. Actual challenge submission and M06 require explicit approval.
 
 ## M06 — GitHub Actions CI after application completion
 

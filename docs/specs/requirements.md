@@ -2,12 +2,15 @@
 
 ## Authority and scope
 
-The supplied `readme.md`, `similarProducts.yaml`, `existingApis.yaml`,
-`docker-compose.yaml`, `shared/simulado/mocks.json` and `shared/k6/test.js`
-are preserved. OpenAPI defines the HTTP contract; mock observations below do
-not silently amend it. M00 delivered bootstrap and planning; M01 implemented
+The original README supplies the challenge brief (preserved in Git); M05 replaces
+the working README with evaluator instructions. Supplied `similarProducts.yaml`,
+`existingApis.yaml`, `docker-compose.yaml`, `shared/simulado/mocks.json` and
+`shared/k6/test.js` are preserved. OpenAPI defines the HTTP contract; mock
+observations below do not silently amend it. M00 delivered bootstrap and planning; M01 implemented
 domain/application behavior; M02 exposes the REST operation and connects its ports
-to the supplied upstream. Resilience/caching remain deferred to M03.
+to the supplied upstream. M03 implements bounded resilience/caching, M04 records
+the official benchmark, and M05 audits delivery and clean-checkout reproducibility.
+See the [final audit](../qa/final-delivery-audit.md) for the current assessment.
 
 ## Required API behavior
 
@@ -38,7 +41,7 @@ to the supplied upstream. Resilience/caching remain deferred to M03.
   These are JSON **numbers**, conflicting with the string ID contract.
 - Detail IDs 1–4 succeed; 5 returns 404; 6 returns 500. Configured delay values
   are 100 for ID 3, 1000 for 100, 5000 for 1000 and 50000 for 10000
-  (intended milliseconds; runtime verification remains pending).
+  (milliseconds, verified against live mocks in M02/M03 and bounded in M04).
 - The k6 labels `notFound` and `error` refer to source products 4 and 5 whose
   *similar details* include failures; they do not specify the required public
   status or prove the source product is absent.

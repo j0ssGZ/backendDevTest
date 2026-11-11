@@ -31,7 +31,7 @@ implementation-specific. M03 adds timeout 504 and bounded-pool admission rejecti
    detail 500. The public spec currently documents only 200 and 404; agree any
    additional error contract without editing supplied challenge files.
    M02 mappings are recorded above; revisit only with an agreed contract change.
-4. **Latency versus completeness (M03 decision; M04 measurement pending):**
+4. **Latency versus completeness (M03 decision; M04 measured):**
    No latency SLO is supplied. Engineering defaults are connect 1 s, acquisition
    500 ms, read inactivity 6 s, complete call 7 s and total execution 10 s. The
    50-second fixture fails the whole operation with 504; no omission or retry.
@@ -88,5 +88,6 @@ M04 is now executed: [report](m04-performance-verification.md) and compact raw
 [evidence](../performance/README.md). The historical statements above describe M02/M03
 at their completion; the benchmark is no longer deferred. Port 5000 was released
 through supported AirPlay Receiver settings (now disabled); the official target was
-unchanged. No production optimization or default change was retained. M05/M06 have
-not started.
+unchanged. No production optimization or default change was retained. M05 audits
+these accepted limitations in the [delivery audit](../qa/final-delivery-audit.md);
+M06 has not started.

@@ -1,5 +1,9 @@
 # Development and M00 verification
 
+Historical M00 record. For the implemented service, current run instructions and
+verification, use the [README](../readme.md) and [M05 audit](qa/final-delivery-audit.md).
+The observations below describe M00 at completion and are retained unchanged.
+
 ## Run locally
 
 Install or select a Java 21 JDK for the current shell, then use the wrapper;
