@@ -5,7 +5,8 @@
 The supplied `readme.md`, `similarProducts.yaml`, `existingApis.yaml`,
 `docker-compose.yaml`, `shared/simulado/mocks.json` and `shared/k6/test.js`
 are preserved. OpenAPI defines the HTTP contract; mock observations below do
-not silently amend it. This milestone delivers bootstrap and planning only.
+not silently amend it. M00 delivered bootstrap and planning; M01 implements
+domain values and application orchestration only. HTTP integration is deferred.
 
 ## Required API behavior (future implementation)
 
@@ -58,6 +59,22 @@ maintainability, resilience, performance and unit testing guide implementation.
 Do not add Caffeine or Resilience4j in M00. Execute the original k6 benchmark
 before final delivery, after functionality exists; do not execute it in M00.
 CI is deferred to M06. Never automatically merge or deploy.
+
+## M01 provisional application policy
+
+These are explicit implementation decisions for M01, not claims about unspecified
+OpenAPI behavior. Revisit failure policy in M02/M03 if verified evidence warrants it.
+
+- A successful empty ID list emits one empty product list. ID lookup completing
+  without a list is a port-contract error, not a missing-source signal.
+- Duplicate similar IDs are retrieved once, preserving their first occurrence.
+- Detail absence fails the whole use case with `MissingProductException`, carrying
+  the missing detail ID. Do not return placeholders, omit details or infer a source 404.
+- Preserve upstream errors and their causes; do not recover failures as successful
+  empty or partial lists. Fail fast even if an earlier detail is still pending.
+- Fetch details with a positive constructor-supplied concurrency limit and preserve
+  similarity order. Cancellation reaches active work; queued lookups are not started.
+- No HTTP status mapping, timeout, retries or cross-request caching is added in M01.
 
 See [design](design.md), [milestones](tasks.md) and
 [unresolved decisions](open-questions.md).

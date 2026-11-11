@@ -40,7 +40,8 @@ boundary DTOs where needed to isolate JSON coercion and error semantics.
 
 ## Planned package layout
 
-Paths below are planned; M00 creates only the entry point, YAML and context test.
+M00 created the entry point, YAML and context test. Domain and application paths
+are implemented in M01; infrastructure paths below remain planned for M02.
 
 ```text
 src/main/java/com/example/similarproducts/
@@ -49,6 +50,7 @@ src/main/java/com/example/similarproducts/
   application/
     GetSimilarProducts.java
     GetSimilarProductsService.java
+    MissingProductException.java
     port/out/SimilarProductIds.java
     port/out/ProductDetails.java
   infrastructure/
@@ -71,29 +73,60 @@ repository abstraction is needed. The upstream URL is already configurable via
 `UPSTREAM_BASE_URL` (default `http://localhost:3001`) or `upstream.base-url`.
 Typed properties and HTTP client configuration arrive with M02.
 
-## Planned execution and trade-offs
+## M01 port contracts
 
-1. Fetch the ordered ID list once, then retrieve details with bounded concurrency.
-   Prefer `flatMapSequential` with an explicit concurrency limit: detail requests
-   overlap while emissions retain input order. Ordinary `flatMap` would reorder
-   results; `concatMap` would serialize latency. Decide the limit with measurements
-   in M04; do not use unbounded fan-out or block Netty event-loop threads.
-2. Collect before writing the public response so a late failure can still map to
+- `GetSimilarProducts.getSimilarProducts(String) -> Mono<List<Product>>`: lazy,
+  one complete ordered list per successful subscription, including an empty list.
+- `SimilarProductIds.findSimilarIds(String) -> Mono<List<String>>`: one ordered
+  list of non-null string IDs or an error. Empty list is valid; `Mono.empty()` is
+  invalid and becomes an `IllegalStateException`, never a source-not-found outcome.
+- `ProductDetails.findById(String) -> Mono<Product>`: emit the requested product,
+  complete empty for absence, or emit an error. Empty completion becomes
+  `MissingProductException(productId)` in the service. Other errors retain their
+  original identity, type and cause, including errors thrown before returning a Mono.
+- Ports must return non-null publishers and support cancellation. No HTTP types or
+  statuses appear in these contracts. The service is constructed directly with
+  both ports and a positive `maxConcurrency`; Spring wiring is deferred to M02.
+
+`Product` is a Java record. ID, name and price are non-null; ID and name are
+non-empty, with no trimming/nonblank restriction. `BigDecimal` is retained without
+rounding or scale conversion; zero and negative values remain legal. Availability
+is a primitive boolean. JSON required-field/null validation, including distinguishing
+missing availability from `false`, belongs to the future adapter.
+
+## Execution and trade-offs
+
+1. M01 defers both port calls until subscription, fetches the ordered ID list once
+   per subscription, applies `distinct()` and retrieves details using
+   `flatMapSequential(..., maxConcurrency, 1)`. Lookups overlap while emissions
+   retain first-occurrence input order. Prefetch is 1 because each detail is a Mono.
+   Later completions buffer behind earlier details; ordinary `flatMap` would reorder
+   results and `concatMap` would serialize latency. No operational default is hidden
+   in the application: the caller supplies the positive limit through the constructor.
+   Tests exercise limits 1, 2 and 3. Choose the runtime value in M02 configuration,
+   then tune with measurements in M04. The service has only final configuration/port
+   fields; deduplication and collection state belong to each subscription.
+2. M01 collects the complete result with `collectList()` before emitting success.
+   Later, collect before writing the public response so a late failure can still map to
    a coherent HTTP status. The contract returns a JSON array rather than a stream.
    This buffers the result; maximum upstream list size is an open question.
 3. Specify connection, response/read and overall request deadlines in M03,
    including pool acquisition and retry time within the total budget. The 50-second
    fixture makes waiting for every detail potentially expensive. No timeout number
    or fallback behavior is approved yet. Cancellation must reach outstanding work.
-4. Distinguish source-ID lookup failure, detail 404, detail 5xx, timeout and malformed
-   JSON. Do not turn every failure into `[]` or map a missing similar detail to a
-   missing source product automatically. Partial success versus fail-fast is an
-   unresolved product decision; record it before implementing externally visible
-   failure behavior. Do not infer it from k6 scenario names.
-5. Preserve uniqueness and first-occurrence similarity if duplicates need defensive
-   handling, but decide ID-versus-object deduplication semantics first. Proposed
-   numeric-ID normalization is confined to the upstream adapter, explicitly tested,
-   and must not change the public string-ID contract.
+4. M01 provisionally fails fast for missing or failed details, including an error
+   from a later lookup while an earlier lookup is pending. It propagates the original
+   error or creates a typed missing-detail error for empty detail completion. No
+   placeholders, partial/empty-success fallback or HTTP status mapping is introduced.
+   Cancellation and fail-fast termination cancel active publishers without starting
+   queued detail calls. No source-existence probe is invented. Future adapters must
+   distinguish lookup failure, missing detail, server error, timeout and malformed
+   JSON; agree externally visible mappings in M02/M03, independently of k6 labels.
+5. M01 deduplicates similar IDs before detail retrieval, retaining first occurrence.
+   Distinct IDs returning identical or mismatched details remain an upstream-boundary
+   question; no object-based deduplication is invented. Proposed numeric-ID
+   normalization remains confined to the future upstream adapter and must not
+   change the public string-ID contract.
 6. In M03 evaluate a bounded, expiring detail cache behind the detail port (decorator
    if useful). Successful values only initially; errors must not become long-lived
    cached absences. TTL, maximum entries, availability freshness, in-flight request
@@ -108,10 +141,13 @@ Typed properties and HTTP client configuration arrive with M02.
   WebTestClient against an unmapped bootstrap probe. It also verifies the upstream
   URL placeholder resolves an explicit override. Separately verify production
   startup on port 5000. No upstream or Docker dependency in this test.
-- Domain: plain unit tests for only contractual invariants and decimal fidelity.
-- Application: deterministic fake outbound ports, later Reactor StepVerifier for
-  empty lists, ordering under out-of-order completion, concurrency bounds and
-  agreed failure semantics. Do not load Spring here.
+- Domain: plain JUnit tests for only contractual invariants and decimal fidelity.
+- M01 application: fake ports, Reactor StepVerifier and controlled TestPublisher
+  signals exercise empty lists, first-occurrence deduplication, reversed completion,
+  bounded subscriptions, fail-fast errors and cancellation at both lookup stages.
+  Repeat subscriptions verify lazy independent state. No Spring context, HTTP,
+  Docker, real sleeps, schedulers or execution-timing assumptions are involved.
+  `reactor-test` is the only new dependency, test scoped and versioned by Boot.
 - REST: WebTestClient slice tests with a stub use case assert route, status,
   content type, exact fields, types and ordered array semantics.
 - HTTP adapter: local HTTP stub exercises paths, numeric-versus-string fixtures,

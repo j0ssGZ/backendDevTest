@@ -1,6 +1,6 @@
 # Milestones and acceptance criteria
 
-## M00 — Bootstrap and architecture (current scope)
+## M00 — Bootstrap and architecture (completed)
 
 - [x] Inspect clean Git state, fork/default branch, original contracts, Compose,
   all mock routes and existing tests (only the supplied k6 script exists).
@@ -20,15 +20,35 @@ results/blockers are recorded. No similar-products implementation, cache,
 resilience library, benchmark run or CI workflow. Stop after commit/push; M01
 requires explicit user approval.
 
-## M01 — Domain and application
+## M01 — Domain and application (completed)
 
-Create Product, GetSimilarProducts, outbound ports and orchestration with fake
-ports. Add Reactor test support only when needed. Resolve relevant questions first.
+- [x] Immutable Product record with contractual null/empty checks and exact
+  BigDecimal storage, without additional price or whitespace restrictions.
+- [x] GetSimilarProducts, SimilarProductIds and ProductDetails contracts, plus
+  constructor-injected orchestration with an explicit positive concurrency cap.
+- [x] Ordered concurrent detail retrieval, first-occurrence ID deduplication,
+  lazy independent subscriptions and cancellation of pending work.
+- [x] Provisional fail-fast absence/error policy documented; typed missing-detail
+  outcome and original error causes preserved without HTTP mappings.
+- [x] Deterministic unit tests with fake ports and controlled publishers;
+  Reactor Test is the only new dependency, test scoped and Boot managed.
+- [x] `./mvnw clean verify` passed: **31 tests, 0 failures/errors/skips**
+  (10 domain, 20 application, 1 existing Boot context test).
+- [x] Import review and `jdeps` confirm the domain depends only on `java.base`;
+  application has no Spring/HTTP/infrastructure imports or blocking operations.
+
+TDD evidence: domain tests first failed before Product existed, then all 10
+passed. Application tests ran against an empty service: 17 behavioral failures;
+after orchestration was implemented, all 20 passed. The final clean verification
+includes the unchanged M00 test. No new unit test needs Spring, HTTP or Docker.
 
 Acceptance: contractual invariant tests pass; empty results and stable similarity
 order under concurrent detail completion are tested; concurrency is bounded;
 agreed duplicate/missing/failure outcomes have unit tests. Domain has no framework
 dependencies; application imports no HTTP adapters. No real HTTP integration yet.
+
+Delivery: one commit `feat: implement similar-products domain and use case`,
+push to `origin/main`, inspect CI once and stop. M02 requires explicit approval.
 
 ## M02 — WebFlux REST and HTTP adapters
 
