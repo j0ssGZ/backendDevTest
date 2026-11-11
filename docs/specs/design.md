@@ -41,8 +41,8 @@ boundary DTOs where needed to isolate JSON coercion and error semantics.
 ## Package layout
 
 M00 created the entry point, YAML and context test; M01 implemented the domain
-and application. M02 implements the infrastructure below without changing either
-inner layer or its port interfaces.
+and application. M02 implements HTTP infrastructure; M03 adds infrastructure
+decorators and resource configuration without changing either inner layer or its ports.
 
 ```text
 src/main/java/com/example/similarproducts/
@@ -63,6 +63,10 @@ src/main/java/com/example/similarproducts/
     http/UpstreamException.java
     config/UpstreamProperties.java
     config/ProductConfiguration.java
+    config/ResilienceProperties.java
+    config/ProductCacheProperties.java
+    cache/CachingProductDetails.java
+    resilience/DeadlineGetSimilarProducts.java
 src/main/resources/application.yaml
 src/test/java/com/example/similarproducts/
   SimilarProductsApplicationTests.java
@@ -121,10 +125,18 @@ failure, not evidence for a new source-not-found rule. See the verification reco
   three-detail examples to overlap without unbounded fan-out. It is not a benchmark
   result, a global concurrency limit, or a latency guarantee; tune in M04.
 
-Spring ProductConfiguration constructs the HTTP adapter and injects it into both
-application ports, then constructs the use case with the configured cap. No Spring
-annotations or infrastructure types enter the domain/application. No new dependency
-is needed for M02; loopback test servers use the existing Reactor Netty dependency.
+Spring ProductConfiguration constructs the HTTP adapter, decorates only its detail
+port with a successful-value cache, constructs the service with the configured cap,
+and wraps the use case with one overall deadline. Infrastructure owns all these
+policies; domain/application and port interfaces remain unchanged. M02 needed no
+new dependency; M03 adds only Boot-managed Caffeine 3.2.4. Loopback test servers
+continue to use the existing Reactor Netty dependency.
+
+M03 adds typed, constructor-validated `resilience` and `product-cache` properties.
+Defaults, environment names, error policy and measured verification are recorded in
+[M03 resilience verification](m03-resilience-verification.md). Durations and pool/cache
+limits must be positive; TCP milliseconds must fit Netty's integer range. Defaults
+live in the property records, avoiding duplicate configuration in YAML.
 
 ## M01 port contracts
 
@@ -163,10 +175,13 @@ presence, including distinguishing missing availability from `false`.
    M02 maps it before committing the public response so a late failure can still
    produce a coherent HTTP status. The contract returns a JSON array rather than a stream.
    This buffers the result; maximum upstream list size is an open question.
-3. Specify connection, response/read and overall request deadlines in M03,
-   including pool acquisition and retry time within the total budget. The 50-second
-   fixture makes waiting for every detail potentially expensive. No timeout number
-   or fallback behavior is approved yet. Cancellation must reach outstanding work.
+3. M03 uses a dedicated bounded pool (32 active, 64 pending acquisitions), TCP
+   connect 1 s, acquisition 500 ms, response read inactivity 6 s and complete call
+   7 s. One outer 10 s execution deadline bounds the initial IDs, all details, pool
+   waiting and upstream error-body handling; it never resets per detail. Cancellation
+   reaches outstanding subscriptions and queued acquisitions. No automatic retries;
+   even Netty's implicit connection-reset retry is explicitly disabled. These are
+   engineering defaults, not challenge SLOs or hard HTTP dispatch/flush guarantees.
 4. M01 provisionally fails fast for missing or failed details, including an error
    from a later lookup while an earlier lookup is pending. It propagates the original
    error or creates a typed missing-detail error for empty detail completion. No
@@ -175,19 +190,28 @@ presence, including distinguishing missing availability from `false`.
    Cancellation and fail-fast termination cancel active publishers without starting
    queued detail calls. No source-existence probe is invented. M02 distinguishes
    missing detail, status, transport and payload failures at the boundary, with
-   the mappings above. Deadline/fallback policy remains M03 work, independent of k6 labels.
+   the mappings above. M03 adds timeout -> 504 and pool admission rejection -> 503,
+   with empty bodies. No fallback omission is added. Error-response bodies are read
+   explicitly so a read timeout cannot be suppressed as an ordinary upstream 500.
 5. M01 deduplicates similar IDs before detail retrieval, retaining first occurrence.
    M02 rejects mismatching identities at the HTTP boundary, so distinct requested
    IDs cannot collapse onto identical product objects. Object-based deduplication
    is unnecessary. Numeric-ID normalization stays confined to the upstream adapter,
    preserving public string IDs.
-6. In M03 evaluate a bounded, expiring detail cache behind the detail port (decorator
-   if useful). Successful values only initially; errors must not become long-lived
-   cached absences. TTL, maximum entries, availability freshness, in-flight request
-   coalescing and whether similar-ID lists should also be cached require decisions.
-   Cache changes upstream load and freshness: compare cold and warm runs in M04.
-   Caffeine and Resilience4j are candidates, not approved M00 dependencies; add
-   either only for a demonstrated need. Avoid retries amplifying 200-VU traffic.
+6. M03 decorates ProductDetails with a bounded Caffeine cache: 1,000 entries,
+   expire-after-write 30 s, successful identity-validated immutable values only.
+   Errors, absence and abandoned loads are not cached. Hits preserve decimals and
+   do not extend expiry. ID lists are never cached. Concurrent misses intentionally
+   load independently, retaining cancellation ownership without shared subscriptions.
+   Cache retention adds a provisional freshness trade-off for price/availability;
+   upstream freshness and ordering of concurrent versions are not established.
+   Compare cold/warm behavior in M04 before tuning capacity or TTL.
+7. The dedicated pool provides the global transport guard, so M03 adds no semaphore,
+   second queue or circuit breaker. Existing Reactor cancellation, response release,
+   shared event loops and codec limits are retained. Spring disposes the provider
+   and invalidates cache entries at shutdown. Caffeine uses direct maintenance with
+   no owned scheduler or thread pool. A breaker remains a future option only if
+   measured outage behavior justifies its additional state and configuration.
 
 ## Test boundaries
 
@@ -209,9 +233,13 @@ presence, including distinguishing missing availability from `false`.
   Spring integration tests exercise controller -> use case -> HTTP adapter on local
   ports and environment placeholders. A controlled ExchangeFunction tests configured
   concurrency deterministically, without scheduling assumptions or external network.
-  Deadline policies remain M03 work.
-- Resilience/cache: virtual time and controlled responses test expiration,
-  cancellation, failure isolation and concurrent cache misses without real sleeps.
+  M03 extends these boundaries with explicit resilience tests.
+- M03 resilience/cache: virtual time, controlled publishers and a fake Caffeine
+  ticker exercise call/overall deadlines, cancellation, capacity, expiry, identity
+  and independent concurrent misses. Short real Netty tests prove response/read
+  timeout, bounded pool rejection/acquisition timeout and channel reuse/cleanup.
+  No test uses sleeps; finite latch waits are failure guards. All 121 earlier tests
+  remain unchanged; the complete suite passes 166 cases.
 - End to end: supplied Docker mocks plus original k6 script in M04. Retain results,
   host/tool versions, configuration and correctness evidence separately; no
   benchmark thresholds are invented as original requirements.

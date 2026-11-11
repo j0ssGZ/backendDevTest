@@ -18,8 +18,11 @@ public final class ApiExceptionHandler {
 
     @ExceptionHandler(UpstreamException.class)
     ResponseEntity<Void> upstream(UpstreamException error) {
-        return ResponseEntity.status(error.kind() == UpstreamException.Kind.TRANSPORT
-                ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_GATEWAY).build();
+        return ResponseEntity.status(switch (error.kind()) {
+            case TIMEOUT -> HttpStatus.GATEWAY_TIMEOUT;
+            case TRANSPORT, OVERLOADED -> HttpStatus.SERVICE_UNAVAILABLE;
+            case HTTP_STATUS, INVALID_PAYLOAD -> HttpStatus.BAD_GATEWAY;
+        }).build();
     }
 
     @ExceptionHandler(RuntimeException.class)

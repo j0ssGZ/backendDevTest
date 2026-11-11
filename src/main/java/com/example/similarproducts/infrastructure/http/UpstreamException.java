@@ -3,7 +3,7 @@ package com.example.similarproducts.infrastructure.http;
 /** Infrastructure failure with its original cause retained for diagnostics, never sent to clients. */
 public final class UpstreamException extends RuntimeException {
 
-    public enum Kind { HTTP_STATUS, TRANSPORT, INVALID_PAYLOAD }
+    public enum Kind { HTTP_STATUS, TRANSPORT, INVALID_PAYLOAD, TIMEOUT, OVERLOADED }
 
     private final Kind kind;
     private final int upstreamStatus;

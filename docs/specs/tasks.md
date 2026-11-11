@@ -78,15 +78,33 @@ contracts and fixtures remain unchanged.
 Delivery: commit `feat: expose similar-products REST API with WebClient`, push to
 `origin/main`, inspect CI once and stop. M03 requires explicit user approval.
 
-## M03 — Resilience and caching
+## M03 — Resilience and caching (completed)
 
-Agree timeout/partial-failure/cache policy before coding it. Configure bounded
-deadlines and connection resources; evaluate caching and optional libraries.
+- [x] Inspect framework defaults and run the unchanged baseline: 121 tests passed.
+- [x] Record failure, timeout, overload and cache policy before implementation.
+- [x] Configure validated finite TCP, acquisition, response, call and overall
+  execution limits; disable automatic retries and preserve M02 error distinctions.
+- [x] Own a bounded upstream pool with finite pending admission, idle eviction
+  and disposal; retain per-request concurrency 4 without redundant limiters.
+- [x] Add successful-detail Caffeine caching with configurable capacity/expiry,
+  exact values, identity checks and independent cancellable misses.
+- [x] Document freshness trade-offs and defer coalescing/circuit breakers.
+- [x] Add 45 deterministic/controlled regression cases; `./mvnw clean verify`
+  passes **166 tests**, zero failures/errors/skips, including all original 121.
+- [x] Start the production JAR on 5001 against unchanged Docker mocks: fast,
+  1 s, 5 s, 50 s, missing, 500 and unknown cases verified. The 50 s fixture
+  returns 504 in approximately 6 s; a separate 200 ms overall override also works.
+- [x] Record configuration, automated and live evidence in
+  [M03 verification](m03-resilience-verification.md); preserve challenge assets.
 
-Acceptance: timeout and cancellation tests pass; slow or failed details behave
-according to recorded decisions; TTL, capacity, concurrent misses and cache-error
-handling are tested. No blocking event-loop calls or unbounded retries/fan-out.
-Record why each added dependency is needed and the accepted freshness trade-off.
+Acceptance: timeout and cancellation tests pass; slow or failed details follow
+recorded decisions; TTL, capacity, concurrent misses and cache-error behavior are
+tested. No blocking production operations, unbounded retry/queue or added owned
+thread pool. Only Caffeine is added; domain/application and API contracts are unchanged.
+No k6 benchmark, speculative tuning, CI workflow or deployment in this milestone.
+
+Delivery: commit `feat: add bounded resilience and product caching`, push to
+`origin/main`, inspect CI once and stop. M04 requires explicit user approval.
 
 ## M04 — k6 performance testing and optimization
 

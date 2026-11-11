@@ -1,12 +1,16 @@
 package com.example.similarproducts.infrastructure.http;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import com.example.similarproducts.application.port.out.ProductDetails;
 import com.example.similarproducts.application.port.out.SimilarProductIds;
 import com.example.similarproducts.domain.Product;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.channel.ConnectTimeoutException;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
@@ -21,20 +25,26 @@ public final class ProductApiClient implements SimilarProductIds, ProductDetails
 
     private final WebClient client;
     private final UpstreamPayloadDecoder decoder;
+    private final Duration callTimeout;
 
     public ProductApiClient(WebClient client, ObjectMapper mapper) {
+        this(client, mapper, Duration.ofSeconds(7));
+    }
+
+    public ProductApiClient(WebClient client, ObjectMapper mapper, Duration callTimeout) {
         this.client = client;
         this.decoder = new UpstreamPayloadDecoder(mapper);
+        this.callTimeout = callTimeout;
     }
 
     @Override
     public Mono<List<String>> findSimilarIds(String productId) {
-        return get("/product/{productId}/similarids", productId, false).map(decoder::similarIds);
+        return bounded(get("/product/{productId}/similarids", productId, false).map(decoder::similarIds));
     }
 
     @Override
     public Mono<Product> findById(String productId) {
-        return get("/product/{productId}", productId, true).map(body -> decoder.product(body, productId));
+        return bounded(get("/product/{productId}", productId, true).map(body -> decoder.product(body, productId)));
     }
 
     private Mono<byte[]> get(String path, String productId, boolean allowMissingDetail) {
@@ -44,19 +54,19 @@ public final class ProductApiClient implements SimilarProductIds, ProductDetails
                         return response.releaseBody().then(Mono.empty());
                     }
                     if (!response.statusCode().equals(HttpStatus.OK)) {
-                        return response.createException().flatMap(cause -> Mono.error(new UpstreamException(
-                                UpstreamException.Kind.HTTP_STATUS, response.statusCode().value(),
-                                "Unexpected upstream HTTP status", cause)));
+                        // Do not let createException() suppress a timeout while reading an error body.
+                        return response.bodyToMono(byte[].class).defaultIfEmpty(new byte[0]).flatMap(body ->
+                                Mono.error(new UpstreamException(UpstreamException.Kind.HTTP_STATUS,
+                                        response.statusCode().value(), "Unexpected upstream HTTP status",
+                                        WebClientResponseException.create(response.statusCode().value(),
+                                                "Unexpected upstream HTTP status", response.headers().asHttpHeaders(), body, null))));
                     }
                     return jsonBody(response);
-                })
-                .onErrorMap(DataBufferLimitException.class, cause -> new UpstreamException(
-                        UpstreamException.Kind.INVALID_PAYLOAD, 0, "Upstream payload exceeds decoding limit", cause))
-                .onErrorMap(InvalidMediaTypeException.class, cause -> new UpstreamException(
-                        UpstreamException.Kind.INVALID_PAYLOAD, 0, "Invalid upstream content type", cause))
-                .onErrorMap(WebClientRequestException.class, this::transportFailure)
-                .onErrorMap(WebClientResponseException.class, this::transportFailure)
-                .onErrorMap(IOException.class, this::transportFailure);
+                });
+    }
+
+    private <T> Mono<T> bounded(Mono<T> operation) {
+        return operation.timeout(callTimeout).onErrorMap(this::classifyFailure);
     }
 
     private Mono<byte[]> jsonBody(ClientResponse response) {
@@ -69,7 +79,28 @@ public final class ProductApiClient implements SimilarProductIds, ProductDetails
                 .switchIfEmpty(Mono.error(() -> UpstreamException.invalid("Empty upstream JSON payload")));
     }
 
-    private UpstreamException transportFailure(Throwable cause) {
-        return new UpstreamException(UpstreamException.Kind.TRANSPORT, 0, "Upstream transport failed", cause);
+    private Throwable classifyFailure(Throwable error) {
+        if (error instanceof UpstreamException) {
+            return error;
+        }
+        if (error instanceof DataBufferLimitException || error instanceof InvalidMediaTypeException) {
+            return new UpstreamException(UpstreamException.Kind.INVALID_PAYLOAD, 0, "Invalid upstream payload", error);
+        }
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof TimeoutException || cause instanceof io.netty.handler.timeout.TimeoutException
+                    || cause instanceof ConnectTimeoutException || cause instanceof SocketTimeoutException) {
+                return new UpstreamException(UpstreamException.Kind.TIMEOUT, 0, "Upstream deadline exceeded", error);
+            }
+            // Reactor Netty shades these internal pool exceptions. Avoid importing its private package.
+            if (cause.getClass().getSimpleName().equals("PoolAcquirePendingLimitException")
+                    || cause.getClass().getSimpleName().equals("PoolShutdownException")) {
+                return new UpstreamException(UpstreamException.Kind.OVERLOADED, 0, "Upstream pool unavailable", error);
+            }
+        }
+        if (error instanceof WebClientRequestException || error instanceof WebClientResponseException
+                || error instanceof IOException) {
+            return new UpstreamException(UpstreamException.Kind.TRANSPORT, 0, "Upstream transport failed", error);
+        }
+        return error;
     }
 }
