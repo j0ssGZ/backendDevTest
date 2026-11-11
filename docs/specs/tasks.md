@@ -159,11 +159,34 @@ requested; its brief remains in Git. No new feature, policy, dependency, CI or d
 Delivery: commit `docs: finalize Java backend delivery audit`, push to `origin/main`,
 inspect CI once and stop. Actual challenge submission and M06 require explicit approval.
 
-## M06 — GitHub Actions CI after application completion
+## M06 — GitHub Actions CI (implemented; hosted verification pending)
 
-Only after M01–M05, add a minimal workflow using Java 21 and the Maven Wrapper.
+- [x] Confirm no existing workflow duplicates verification. Java 21 is required;
+  Wrapper 3.3.4 pins Maven 3.9.16 and its distribution SHA-256.
+- [x] Add `.github/workflows/ci.yml`: pushes to main, PRs targeting main and manual
+  dispatch; Ubuntu hosted runner, Temurin 21 and setup-java Maven dependency cache.
+- [x] Pin official checkout/setup-java/upload-artifact actions to reviewed full
+  release commit SHAs; contents:read only, no persisted checkout credentials.
+- [x] Cancel superseded branch/PR runs; use a finite 15-minute job budget.
+- [x] Run exactly `./mvnw -B -ntp clean verify`; no skipped tests or failure suppression.
+  Surefire executes the existing unit and integration tests and Maven packages the JAR.
+- [x] Upload only XML/text Surefire reports after Maven failure, retained seven days.
+  No binaries, Maven settings or environment dumps are included.
+- [x] Validate YAML/expressions with actionlint 1.7.12 and review pinned action
+  metadata/inputs. Local Maven verification passes all 166 tests.
+- [x] Document CI, local reproduction and limitations in README. Docker/k6 and
+  credential/database-dependent vulnerability scans are not CI jobs; vulnerability
+  absence remains NOT VERIFIED. No production/fixture/configuration changes.
+- [ ] Confirm an actual successful GitHub-hosted workflow execution. **Pending**:
+  local success is not hosted CI evidence. Inspect the first run once after push;
+  record its status/URL in the handover and stop if queued or running.
 
-Acceptance: push/PR workflow performs compilation and tests reproducibly without
-depending on a developer's Docker daemon; actions have minimal permissions and
-pinned reviewed versions. No automatic merge or deploy. After pushing, check CI
-once; if pending/running, report and stop until the user returns. Do not poll CI.
+Acceptance: compilation, all tests and packaging must succeed on the real Ubuntu /
+Temurin runner. M06 is not complete until that success has actually been verified.
+The workflow's existence or a local green build is insufficient. Pin/runner/JDK
+updates require review; report uploads and PR/manual triggers are configured but
+not claimed to have been exercised by the initial push run.
+
+Delivery: commit `ci: add Java 21 Maven verification workflow`, push to `origin/main`,
+check CI once without polling, then stop. If pending/running, ask the user to return
+when it finishes. No PR, publish, automatic merge or deployment.

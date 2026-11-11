@@ -164,6 +164,35 @@ and use random server ports. Contract assertions check the supplied schema's beh
 there is no generated OpenAPI-validator conformance certification. A separate live
 Docker smoke check and fresh-cache build are recorded in the [audit](docs/qa/final-delivery-audit.md).
 
+## Continuous integration
+
+[Java CI](.github/workflows/ci.yml) runs on pushes to `main`, pull requests targeting
+`main`, and manual dispatch from the [Actions page](https://github.com/j0ssGZ/backendDevTest/actions/workflows/ci.yml).
+It uses `ubuntu-latest`, Temurin Java 21 and the Maven Wrapper (Maven 3.9.16), with
+Maven dependency caching. Cache misses still resolve dependencies normally; build
+outputs are not cached. The local equivalent is:
+
+```sh
+./mvnw -B -ntp clean verify
+```
+
+This compiles, runs all unit and HTTP/Spring integration tests, and packages the JAR.
+Tests use isolated loopback stubs and ephemeral ports; Docker, live mocks, port 5000
+and k6 are not required or run in CI. The job has a 15-minute limit. Superseded runs
+for the same branch/PR are canceled. Official actions are pinned to full commit SHAs,
+permissions are `contents: read`, and checkout credentials are not persisted.
+
+When Maven fails, existing Surefire XML/text reports are uploaded for seven days;
+no JARs, settings files or environment dumps are uploaded. Setup/compilation failures
+may have no test reports; their errors remain in the job log. No failure is suppressed.
+
+Dependency/image vulnerability scanning is **not included**; the M05 unverified
+security finding remains open. No credential-dependent scanner, external database
+update gate, deployment or publishing was added. GitHub/Maven/JDK downloads still
+require network access; `ubuntu-latest` and Java 21 patch versions can evolve.
+The workflow is implemented, with its first hosted verification **pending**; a local
+passing build does not establish green GitHub CI. See [M06 status](docs/specs/tasks.md).
+
 ## Performance testing
 
 Run the application on host port **5000**, then:
@@ -225,6 +254,7 @@ No database, Redis or distributed cache is needed for this read-only upstream
 aggregation challenge. A circuit breaker was not added without a demonstrated
 benefit beyond existing bounds; arbitrary retries would amplify failure traffic.
 Partial fabricated responses would violate the chosen completeness policy.
-Deployment, authentication and CI are not presented as completed deliverables.
-M06 GitHub Actions remains separate. The [milestone plan](docs/specs/tasks.md) and
+Deployment and authentication are outside this challenge implementation. GitHub CI
+is configured as described above; M06 completion awaits successful hosted verification.
+The [milestone plan](docs/specs/tasks.md) and
 [final audit](docs/qa/final-delivery-audit.md) record delivery scope and outstanding decisions.
